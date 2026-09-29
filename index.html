@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pou Hub — Devlog platform for game developers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="#/" class="logo">
+        <span class="logo-mark">P</span>
+        <span class="logo-text">Pou<span class="accent">Hub</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#/" data-nav="discover">Discover</a>
+        <a href="#/my-games" data-nav="my-games">My Games</a>
+        <a href="#/create" data-nav="create">Create Devlog</a>
+      </nav>
+      <div class="nav-right">
+        <div class="search-wrap">
+          <input id="search-input" type="text" placeholder="Search games, devs…" autocomplete="off" />
+          <div id="search-results" class="search-results hidden"></div>
+        </div>
+        <a href="#/profile/dev-1" class="avatar" id="header-avatar" title="Mira Kovalenko">MK</a>
+      </div>
+    </div>
+    <nav class="nav-links mobile">
+      <a href="#/" data-nav="discover">Discover</a>
+      <a href="#/my-games" data-nav="my-games">My Games</a>
+      <a href="#/create" data-nav="create">Create Devlog</a>
+    </nav>
+  </header>
+
+  <main id="app"></main>  
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>Pou Hub — MVP prototype. Frontend only, mock data.</span>
+      <span class="muted">
+        Fair discovery · Feedback-first · Pre-release ·
+        <button id="reset-demo" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:0;text-decoration:underline;">Reset demo data</button>
+      </span>
+    </div>
+  </footer>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
