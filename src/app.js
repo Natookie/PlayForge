@@ -2,11 +2,22 @@ import { loadState, onRender, resetDemo, setCurrentUser, startPolling } from './
 import { render } from './router.js';
 import { setupSearch } from './ui/search.js';
 import { showToast } from './ui/toast.js';
+import { initTheme, toggleTheme } from './ui/theme.js';
+import { clearWelcomeExpanded } from './components/welcomeStrip.js';
 
 onRender((opts) => render(opts));
 window.addEventListener('hashchange', () => render());
 
 window.addEventListener('DOMContentLoaded', async () => {
+  initTheme();
+
+  const themeBtn = document.getElementById('theme-toggle');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      toggleTheme();
+    });
+  }
+
   const params = new URLSearchParams(window.location.search);
   setCurrentUser(params.get('me'));
 
@@ -23,6 +34,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (resetBtn) {
     resetBtn.addEventListener('click', async () => {
       await resetDemo();
+      clearWelcomeExpanded();
       render({ scroll: true });
       showToast('Demo data reset.');
     });

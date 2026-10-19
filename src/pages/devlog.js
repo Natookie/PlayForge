@@ -3,6 +3,7 @@ import { escapeHtml, timeAgo } from '../utils.js';
 import { getDevlog, getGame, getDeveloper, getFeedbackFor, devName } from '../selectors.js';
 import { imagePlaceholder } from '../components/imagePlaceholder.js';
 import { feedbackBadge, saveButton } from '../components/badges.js';
+import { coverArt } from '../components/coverArt.js';
 import { renderFeedbackItem } from '../components/feedbackItem.js';
 
 const FEEDBACK_CATS = ['All', 'Art', 'Mechanics', 'Audio', 'UX', 'Business'];
@@ -106,9 +107,15 @@ export function renderDevlogDetail(devlogId) {
           '<div class="detail-main">' +
             '<h1>' + escapeHtml(g.title) + '</h1>' +
             '<div class="detail-dev">by <a href="#/profile/' + g.developerId + '">' + escapeHtml(devName(g.developerId)) + '</a></div>' +
-            imagePlaceholder(g.thumbnailSeed, g.title + ' - ' + g.stage) +
+            coverArt(g) +
             '<h2 class="devlog-heading">' + escapeHtml(dl.title) + '</h2>' +
             '<div class="devlog-body">' + escapeHtml(dl.content) + '</div>' +
+            (dl.videoUrl
+              ? '<div class="devlog-video" style="margin-top:16px;">' +
+                  '<video controls preload="metadata" src="' + escapeHtml(dl.videoUrl) + '"></video>' +
+                  '<div class="devlog-video-label">Attached clip</div>' +
+                '</div>'
+              : '') +
             '<div style="margin-top:16px;">' + imagePlaceholder(dl.imageSeed, 'work in progress') + '</div>' +
             feedbackForm +
           '</div>' +

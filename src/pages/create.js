@@ -51,6 +51,12 @@ export function renderCreate() {
           '<textarea id="c-desc" placeholder="What changed? What did you learn? What is still uncertain?"></textarea>' +
           '<div class="field-error hidden" id="c-desc-error">Please describe what you worked on.</div>' +
         '</div>' +
+        '<div class="form-row">' +
+          '<label for="c-video">Video URL <span style="text-transform:none;font-weight:400;color:var(--muted);">(optional)</span></label>' +
+          '<input type="text" id="c-video" placeholder="https://example.com/clip.mp4" />' +
+          '<div class="hint">Paste a link to an MP4, WebM, or other browser-playable video. Direct links only — not YouTube or Vimeo pages.</div>' +
+          '<div class="field-error hidden" id="c-video-error">That does not look like a valid URL.</div>' +
+        '</div>' +
         '<div class="form-row two" id="new-game-fields">' +
           '<div><label for="c-genre">Genre</label><select id="c-genre">' + sel(GENRES, 'Simulation') + '</select></div>' +
           '<div><label for="c-engine">Engine</label><select id="c-engine">' + sel(ENGINES, 'Unity') + '</select></div>' +

@@ -16,6 +16,8 @@ export function publishDevlog(btn) {
   const dlTitle = document.getElementById('c-title').value.trim();
   const desc = document.getElementById('c-desc').value.trim();
   const request = document.getElementById('c-request').checked;
+  const videoUrlRaw = (document.getElementById('c-video') || {}).value || '';
+  const videoUrl = videoUrlRaw.trim();
 
   let ok = true;
   if (mode === 'new') {
@@ -81,6 +83,7 @@ export function publishDevlog(btn) {
       content: desc,
       timestamp: new Date().toISOString(),
       imageSeed: game.thumbnailSeed + '-devlog-' + now,
+      videoUrl: videoUrl || undefined,
     });
 
     saveState();

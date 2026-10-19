@@ -3,18 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pou Hub — Devlog platform for game developers</title>
+  <title>PlayForge — Devlog platform for game developers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Apply the saved theme before first paint to avoid a flash of the wrong theme. -->
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('playforge-theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.setAttribute('data-theme', stored);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
 </head>
 <body>
   <header class="navbar">
     <div class="nav-inner">
-      <a href="#/" class="logo">
-        <span class="logo-mark">P</span>
-        <span class="logo-text">Pou<span class="accent">Hub</span></span>
+      <a href="#/" class="logo" aria-label="PlayForge home">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="20" height="20" focusable="false">
+            <!-- Restrained duck glyph. Single flat silhouette, no detail loss at 20px. -->
+            <path d="M22 8.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z" fill="currentColor"/>
+            <path d="M10.5 12.5c0-1 .8-1.8 1.8-1.8h4.3c2.6 0 4.7 2.1 4.7 4.7v.3c0 3.6-2.9 6.5-6.5 6.5h-1.2c-2 0-3.6-1.6-3.6-3.6v-2.1c0-.9.7-1.6 1.6-1.6h4.1v-1.2a1.2 1.2 0 0 0-1.2-1.2h-2.9c-.6 0-1.1-.5-1.1-1.1z" fill="currentColor"/>
+            <path d="M6.5 14.5l3 2-3 2z" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="logo-text">PlayForge</span>
       </a>
       <nav class="nav-links">
         <a href="#/" data-nav="discover">Discover</a>
@@ -26,6 +51,28 @@
           <input id="search-input" type="text" placeholder="Search games, devs…" autocomplete="off" />
           <div id="search-results" class="search-results hidden"></div>
         </div>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle light/dark theme">
+          <span class="theme-icon theme-icon-sun" aria-hidden="true">
+            <svg viewBox="0 0 20 20" width="16" height="16" focusable="false">
+              <circle cx="10" cy="10" r="4" fill="currentColor"/>
+              <g stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <line x1="10" y1="1.5" x2="10" y2="3.5"/>
+                <line x1="10" y1="16.5" x2="10" y2="18.5"/>
+                <line x1="1.5" y1="10" x2="3.5" y2="10"/>
+                <line x1="16.5" y1="10" x2="18.5" y2="10"/>
+                <line x1="3.9" y1="3.9" x2="5.3" y2="5.3"/>
+                <line x1="14.7" y1="14.7" x2="16.1" y2="16.1"/>
+                <line x1="3.9" y1="16.1" x2="5.3" y2="14.7"/>
+                <line x1="14.7" y1="5.3" x2="16.1" y2="3.9"/>
+              </g>
+            </svg>
+          </span>
+          <span class="theme-icon theme-icon-moon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" width="16" height="16" focusable="false">
+              <path d="M15.5 11.5a6 6 0 1 1-7-7 5 5 0 0 0 7 7z" fill="currentColor"/>
+            </svg>
+          </span>
+        </button>
         <a href="#/profile/dev-1" class="avatar" id="header-avatar" title="Mira Kovalenko">MK</a>
       </div>
     </div>
@@ -36,11 +83,11 @@
     </nav>
   </header>
 
-  <main id="app"></main>  
+  <main id="app"></main>
 
   <footer class="footer">
     <div class="footer-inner">
-      <span>Pou Hub — MVP prototype. Frontend only, mock data.</span>
+      <span>PlayForge — MVP prototype. Frontend with optional PHP state relay.</span>
       <span class="muted">
         Fair discovery · Feedback-first · Pre-release ·
         <button id="reset-demo" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:0;text-decoration:underline;">Reset demo data</button>

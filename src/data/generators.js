@@ -104,6 +104,12 @@ const DETAILS = [
   'I am trying not to polish anything until the loop is fun.',
 ];
 
+export const SAMPLE_VIDEOS = [
+  'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4',
+  'https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4',
+  'https://test-videos.co.uk/vids/jellyfish/mp4/h264/360/Jellyfish_360_10s_1MB.mp4',
+];
+
 const POOLS = {
   topic: TOPICS,
   problem: PROBLEMS,
@@ -181,4 +187,14 @@ export function makeDevlogTitle(seed, opts = {}) {
     .replace('{Topic}', titleCase(rawTopic))
     .replace('{verdict}', verdict)
     .replace('{n}', String(n));
+}
+
+export function shouldHaveVideo(seed) {
+  return hashString(String(seed) + ':video') % 2 === 0;
+}
+
+let videoPickCounter = 0;
+export function pickVideo(seed) {
+  const pick = videoPickCounter++;
+  return SAMPLE_VIDEOS[pick % SAMPLE_VIDEOS.length];
 }

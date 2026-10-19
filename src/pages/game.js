@@ -1,7 +1,7 @@
 import { STATE } from '../state.js';
 import { escapeHtml, timeAgo } from '../utils.js';
 import { getGame, getDeveloper, getFeedbackFor, devName } from '../selectors.js';
-import { imagePlaceholder } from '../components/imagePlaceholder.js';
+import { coverArt } from '../components/coverArt.js';
 import { feedbackBadge, saveButton } from '../components/badges.js';
 
 export function renderGamePage(gameId) {
@@ -17,7 +17,7 @@ export function renderGamePage(gameId) {
 
   const hero =
     '<div class="game-hero">' +
-      '<div class="thumb-wrap">' + imagePlaceholder(g.thumbnailSeed, g.title) + '</div>' +
+      '<div class="thumb-wrap">' + coverArt(g) + '</div>' +
       '<div>' +
         '<h1>' + escapeHtml(g.title) + '</h1>' +
         '<div class="dev-line">by <a href="#/profile/' + g.developerId + '">' + escapeHtml(devName(g.developerId)) + '</a></div>' +

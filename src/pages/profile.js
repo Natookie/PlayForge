@@ -1,7 +1,7 @@
 import { STATE } from '../state.js';
 import { escapeHtml, timeAgo } from '../utils.js';
 import { getDeveloper, getGame, getTrackRecord } from '../selectors.js';
-import { imagePlaceholder } from '../components/imagePlaceholder.js';
+import { coverArt } from '../components/coverArt.js';
 import { feedbackBadge } from '../components/badges.js';
 
 export function renderProfile(devId) {
@@ -54,7 +54,7 @@ export function renderProfile(devId) {
         const dlCount = STATE.devlogs.filter((d) => d.gameId === g.id).length;
         return (
           '<a class="game-card" href="#/game/' + g.id + '">' +
-            imagePlaceholder(g.thumbnailSeed, g.title) +
+            coverArt(g) +
             '<div class="gc-body">' +
               '<h3 class="gc-title">' + escapeHtml(g.title) + '</h3>' +
               '<div class="gc-meta"><span>' + escapeHtml(g.genre) + ' &middot; ' + escapeHtml(g.engine) + '</span><span>' + dlCount + ' devlogs</span></div>' +

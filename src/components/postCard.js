@@ -1,6 +1,6 @@
 import { escapeHtml, timeAgo } from '../utils.js';
 import { devName, stalenessChip } from '../selectors.js';
-import { imagePlaceholder } from './imagePlaceholder.js';
+import { coverArt } from './coverArt.js';
 import { feedbackBadge, saveButton } from './badges.js';
 
 export function postCard(post, opts) {
@@ -13,7 +13,13 @@ export function postCard(post, opts) {
   return (
     '<div class="post-card' + (opts.queue ? ' queue-card' : '') + '">' +
       '<a href="#/devlog/' + dl.id + '" style="display:flex;flex-direction:column;flex:1;">' +
-        '<div class="thumb">' + imagePlaceholder(g.thumbnailSeed, g.title) + '</div>' +
+        '<div class="thumb">' +
+          coverArt(g) +
+          '<div class="thumb-actions">' +
+            (dl.videoUrl ? '<span class="play-badge" title="Includes video">&#9654;</span>' : '') +
+            saveButton(dl.id) +
+          '</div>' +
+        '</div>' +
         '<div class="body">' +
           '<div class="title-row">' +
             '<div>' +
@@ -42,7 +48,6 @@ export function postCard(post, opts) {
             : '') +
         '</div>' +
       '</a>' +
-      '<div style="padding:0 14px 12px;display:flex;justify-content:flex-end;">' + saveButton(dl.id) + '</div>' +
     '</div>'
   );
 }

@@ -3,8 +3,27 @@ import { bindFeedbackForm, bindFeedbackItemActions } from './feedback.js';
 import { publishDevlog } from './create.js';
 import { bindProfileEdit } from './profile.js';
 import { showToast } from '../ui/toast.js';
+import { isWelcomeExpanded, setWelcomeExpanded } from '../components/welcomeStrip.js';
 
 export function bindPageEvents(route) {
+  //Welcome panel
+  const welcomeToggle = document.getElementById('welcome-toggle');
+  if (welcomeToggle) {
+    welcomeToggle.addEventListener('click', () => {
+      const next = !isWelcomeExpanded();
+      setWelcomeExpanded(next);
+      requestRender({ scroll: false });
+    });
+  }
+
+  const welcomeCta = document.getElementById('welcome-cta');
+  if (welcomeCta) {
+    welcomeCta.addEventListener('click', () => {
+      STATE.discoverTab = 'feedback';
+      requestRender({ scroll: true });
+    });
+  }
+
   //Discover filters
   const bind = (id, key) => {
     const el = document.getElementById(id);

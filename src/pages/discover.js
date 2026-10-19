@@ -1,6 +1,7 @@
 import { STATE } from '../state.js';
 import { getPosts, getQueuePosts, isSaved } from '../selectors.js';
 import { postCard } from '../components/postCard.js';
+import { welcomeStrip } from '../components/welcomeStrip.js';
 
 const GENRES = ['All', 'Action', 'Horror', 'Simulation', 'RPG', 'Strategy', 'Arcade', 'Narrative'];
 const ENGINES = ['All', 'Unity', 'Unreal', 'Godot', 'Other'];
@@ -66,10 +67,11 @@ export function renderDiscover() {
     saved: 'Devlogs you saved for later. Private to you.'
   }[tab];
 
+  const strip = welcomeStrip();
   return (
     '<div class="container">' +
       '<h1 class="page-title">Discover</h1>' +
-      '<p class="page-sub">' + subText + '</p>' +
+      (strip ? strip : '<p class="page-sub">' + subText + '</p>') +
       tabHtml +
       filterBar +
       '<div class="feed-meta"><span>' + filtered.length + ' devlog' + (filtered.length === 1 ? '' : 's') + '</span>' +
