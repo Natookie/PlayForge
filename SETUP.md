@@ -1,11 +1,11 @@
-# Pou Hub — Setup and Two-Device Testing
+# Play Forge — Setup and Two-Device Testing
 
-This document walks through running Pou Hub locally with XAMPP and testing it
+This document walks through running Play Forge locally with XAMPP and testing it
 across two devices on the same Wi-Fi. The single-device quickstart is in
 [`README.md`](README.md); this file is the longer path, aimed at demonstrating
 the shared state relay that lets two browsers see each other's changes.
 
-Pou Hub has no JavaScript build step. It is plain HTML, CSS, and ES modules
+Play Forge has no JavaScript build step. It is plain HTML, CSS, and ES modules
 loaded by the browser. PHP is used only for the shared state relay.
 
 ---
@@ -84,7 +84,7 @@ Open these URLs on device A, in order:
 
 ### 3a. `http://localhost/pou-hub/`
 
-Expected: the Pou Hub Discover feed loads with seeded games and devlogs.
+Expected: the Play Forge Discover feed loads with seeded games and devlogs.
 
 If this fails, Apache is not running or the folder is not where you think it
 is. Fix this before continuing.
@@ -263,7 +263,7 @@ If device B still cannot load the app, see
 
 ## 9. Understanding the two demo users
 
-Pou Hub has no authentication. The `?me=` query parameter selects which
+Play Forge has no authentication. The `?me=` query parameter selects which
 seeded demo profile the current page acts as. The available values are
 `dev-1` through `dev-8`, matching the entries in
 `src/data/developers.js`.

@@ -1,6 +1,6 @@
-# Pou Hub
+# Play Forge
 
-Pou Hub is a small front-end prototype for discovering games in progress, reading developer updates, and leaving focused feedback. It is aimed at indie game developers who want useful playtest notes, and players who want to follow work before release.
+Play Forge is a small front-end prototype for discovering games in progress, reading developer updates, and leaving focused feedback. It is aimed at indie game developers who want useful playtest notes, and players who want to follow work before release.
 
 The prototype includes Discover, game detail, devlog detail, developer profile, My Games, and Create Devlog views. Search, filters, saved items, feedback, and demo profiles are powered by mock data. The interface is plain HTML, CSS, and JavaScript modules; PHP provides an optional shared state relay.
 
