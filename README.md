@@ -1,8 +1,36 @@
 # Play Forge
 
-Play Forge is a small front-end prototype for discovering games in progress, reading developer updates, and leaving focused feedback. It is aimed at indie game developers who want useful playtest notes, and players who want to follow work before release.
+Play Forge is a prototype for discovering games in progress, following developer updates, and giving actionable playtest feedback. It is aimed at indie developers looking for useful feedback and players who want to follow games before release.
 
-The prototype includes Discover, game detail, devlog detail, developer profile, My Games, and Create Devlog views. Search, filters, saved items, feedback, and demo profiles are powered by mock data. The interface is plain HTML, CSS, and JavaScript modules; PHP provides an optional shared state relay.
+The app is plain HTML, CSS, and browser JavaScript modules, with no build step or package install. Its seeded demo data can be used on its own, or PHP can relay saved state between browsers.
+
+## Features
+
+- Browse recent devlogs, a feedback-request queue, or saved devlogs. Filter by genre, engine, development stage, and requested feedback category.
+- Search for games and developers.
+- View game pages with their devlog history, and open individual devlogs with previous/next navigation.
+- Leave feedback by category, optionally structuring it around what you tried, expected, and observed. Developers can reply, mark notes as seen, or mark them as acted on.
+- Create a game and its first devlog, or publish a devlog for an existing game. Devlogs can include a direct video URL.
+- View and edit the selected demo developer's profile, browse their games, and view or copy their feedback portfolio as Markdown.
+- Switch between light and dark themes; the theme preference is stored in the browser.
+- Preview a sponsorship flow on game pages. Sponsorship is a mockup and does not process payments.
+
+## Pages and routes
+
+The app uses hash routes:
+
+| Route | Page |
+| --- | --- |
+| `#/` | Discover feed |
+| `#/queue` | Discover's feedback-request queue |
+| `#/game/game-1` | Game details and devlog thread |
+| `#/devlog/game-1-dl-1` | Devlog and feedback |
+| `#/profile/dev-1` | Developer profile |
+| `#/portfolio/dev-1` | Developer feedback portfolio |
+| `#/my-games` | Current demo user's profile and games |
+| `#/create` | Create a game or devlog |
+
+The `?me=dev-2` query parameter selects a different seeded demo user, for example `http://localhost/pou-hub/?me=dev-2`. This is only a demo identity selector, not authentication.
 
 ## Run locally
 
@@ -12,7 +40,7 @@ The project has no JavaScript package-install step. With XAMPP, put the folder i
 http://localhost/pou-hub/
 ```
 
-Serving it through Apache/PHP enables `api/state.php` to read and write `data/state.json`. The web server needs permission to write that file. If you only want to inspect the front end, you can open `index.html` or use another static file server; API requests will fail and the app will fall back to its JavaScript seed data. Updates made in that mode are not reliably persisted.
+Serving it through Apache/PHP enables `api/state.php` to read and write `data/state.json`. The web server needs permission to write that file. To inspect the front end without PHP, use a static HTTP server (do not open `index.html` directly as a `file:` URL); the app will fall back to its JavaScript seed data when API requests fail, and changes will not persist reliably or sync between browsers. See [SETUP.md](SETUP.md) for XAMPP and two-device setup.
 
 ## Where content lives
 
@@ -50,7 +78,7 @@ Keep IDs unique and use the existing genre, engine, stage, and feedback category
 
 ### Write a specific dummy devlog
 
-For bulk filler, adjust `devlogPlan`; `src/data/devlogs.js` uses `makeDevlogTitle` and `makeDevlogContent` to create deterministic sample text. For a post with exact wording, append a hand-authored object to the `out` array inside `buildDevlogs()` before its final sort:
+For bulk filler, adjust `devlogPlan`; `src/data/devlogs.js` uses `makeDevlogTitle` and `makeDevlogContent` to create sample text. For a post with exact wording, append a hand-authored object to the `out` array inside `buildDevlogs()` before its final sort:
 
 ```js
 out.push({
@@ -73,7 +101,7 @@ Seed feedback in `src/data/feedback.js`. Each item should reference an existing 
 
 ## Use the in-app form
 
-The Create Devlog page can create a game and its first post, or publish a post for an existing game owned by the selected demo user. The current user defaults to `dev-1`; use a query parameter such as `?me=dev-2` to preview another seeded profile. The form asks for a game title when creating a game, then a devlog title and update text. Its image/GIF attachment control is a placeholder only.
+The Create Devlog page can create a game and its first post, or publish a post for an existing game owned by the selected demo user. The current user defaults to `dev-1`; use a query parameter such as `?me=dev-2` to preview another seeded profile. A new game includes genre, engine, stage, and feedback-request settings. Each post needs a title and update text, and may include a direct URL to a browser-playable video. The image/GIF attachment control is a placeholder only; it does not upload files.
 
 When PHP is available, form changes are saved as the full app state in `data/state.json`; open clients poll for updates every three seconds. To return to the source seed data, use **Reset demo data** in the footer. This overwrites the JSON state with the current JavaScript seeds, so do not use it if you need to preserve form-created demo content.
 
@@ -86,5 +114,6 @@ To add a page, create a renderer under `src/pages/`, register its hash pattern a
 - There is no authentication or authorization; changing `?me=` only selects a seeded demo profile.
 - The PHP endpoint stores the entire app state as one JSON document. It is intended for a local demo, not concurrent production use; overlapping writes can replace each other's changes.
 - The API currently allows cross-origin requests and has no access control. Do not expose it publicly with real user data.
-- Images are placeholders, and the Create Devlog attachment control does not upload files.
+- Game and devlog artwork is generated placeholder imagery; the Create Devlog image/GIF attachment control does not upload files. Video playback uses a supplied direct URL.
+- The sponsorship panel is a visual preview only; there is no payment integration.
 - If `data/state.json` already contains state, it takes precedence over the JavaScript seeds at startup. Editing seed files alone will not change that saved state until you reset it or remove the saved state while the app is stopped.

@@ -37,16 +37,29 @@ export function renderProfile(devId) {
     : '';
 
   const recordPanel =
-    '<div class="side-panel">' +
-      '<h3>Track record</h3>' +
-      '<ul class="record-list">' +
-        '<li><span class="k">Feedback notes given</span><span class="v">' + record.given + '</span></li>' +
-        '<li><span class="k">Acknowledged by devs</span><span class="v good">' + record.acknowledged + '</span></li>' +
-        '<li><span class="k">Ack rate</span><span class="v good">' + record.ackRate + '%</span></li>' +
-        '<li><span class="k">Devs replied</span><span class="v">' + record.withReply + '</span></li>' +
-        '<li><span class="k">Games covered</span><span class="v">' + record.games + '</span></li>' +
-      '</ul>' +
-      '<div class="muted" style="font-size:11px;margin-top:10px;line-height:1.4;">Acknowledged = the developer marked the note as seen. No scores, no likes.</div>' +
+    '<div class="side-panel record-panel">' +
+      '<div class="record-head">' +
+        '<h3>Feedback track record</h3>' +
+        (record.given > 0
+          ? '<a href="#/portfolio/' + dev.id + '" class="record-link">See full portfolio →</a>'
+          : '') +
+      '</div>' +
+      (record.given === 0
+        ? '<div class="muted" style="font-size:12px;">' + escapeHtml(dev.name.split(' ')[0]) + ' has not left feedback yet.</div>'
+        : '<div class="record-headline">' +
+            '<span class="record-big">' + record.actedOn + '</span>' +
+            '<span class="record-big-label">' + (record.actedOn === 1 ? 'note' : 'notes') + ' acted on by developers</span>' +
+          '</div>' +
+          '<ul class="record-list">' +
+            '<li><span class="k">Notes given</span><span class="v">' + record.given + '</span></li>' +
+            '<li><span class="k">Acknowledged by devs</span><span class="v good">' + record.acknowledged + '</span></li>' +
+            '<li><span class="k">Ack rate</span><span class="v good">' + record.ackRate + '%</span></li>' +
+            '<li><span class="k">Devs replied</span><span class="v">' + record.withReply + '</span></li>' +
+            '<li><span class="k">Games covered</span><span class="v">' + record.games + '</span></li>' +
+            '<li><span class="k">Genres covered</span><span class="v">' + record.genres + '</span></li>' +
+          '</ul>' +
+          '<div class="muted record-note">Acted on = the developer marked a note as one that changed something they built. No scores, no likes.</div>'
+      ) +
     '</div>';
 
   const gamesHtml = devGames.length

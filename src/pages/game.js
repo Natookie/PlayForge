@@ -3,6 +3,8 @@ import { escapeHtml, timeAgo } from '../utils.js';
 import { getGame, getDeveloper, getFeedbackFor, devName } from '../selectors.js';
 import { coverArt } from '../components/coverArt.js';
 import { feedbackBadge, saveButton } from '../components/badges.js';
+import { isCurrentUserOwnerOfGame } from '../selectors.js';
+import { sponsorPanel } from '../components/sponsorPanel.js';
 
 export function renderGamePage(gameId) {
   const g = getGame(gameId);
@@ -31,7 +33,12 @@ export function renderGamePage(gameId) {
         '<div class="hero-meta">' +
           '<div class="hm-item"><span class="hm-num">' + devlogs.length + '</span><span class="hm-label">Devlogs</span></div>' +
           '<div class="hm-item"><span class="hm-num">' + totalFeedback + '</span><span class="hm-label">Feedback notes</span></div>' +
-          '<div class="hm-item"><span class="hm-num">' + (g.needsFeedback ? 'Open' : '—') + '</span><span class="hm-label">Feedback status</span></div>' +
+          (isCurrentUserOwnerOfGame(g)
+            ? '<div class="hm-item hm-action">' +
+                '<a class="btn btn-primary btn-sm" href="#/create?game=' + g.id + '">New devlog</a>' +
+              '</div>'
+            : '<div class="hm-item"><span class="hm-num">' + (g.needsFeedback ? 'Open' : '—') + '</span><span class="hm-label">Feedback status</span></div>'
+          ) +
         '</div>' +
       '</div>' +
     '</div>';
@@ -58,13 +65,41 @@ export function renderGamePage(gameId) {
         );
       }).join('')
     : '<div class="empty">No devlogs yet for this game.</div>';
+  
+  const sidePanel =
+    '<div class="side-panel">' +
+      '<h3>Game</h3>' +
+      '<ul class="meta-list">' +
+        '<li><span class="k">Genre</span><span class="v">' + escapeHtml(g.genre) + '</span></li>' +
+        '<li><span class="k">Engine</span><span class="v">' + escapeHtml(g.engine) + '</span></li>' +
+        '<li><span class="k">Stage</span><span class="v">' + escapeHtml(g.stage) + '</span></li>' +
+        '<li><span class="k">Devlogs</span><span class="v">' + devlogs.length + '</span></li>' +
+        '<li><span class="k">Feedback</span><span class="v">' + totalFeedback + '</span></li>' +
+        '<li><span class="k">Funding</span><span class="v">Sponsorship · no ads</span></li>' +
+      '</ul>' +
+    '</div>' +
+    (dev
+      ? '<div class="side-panel">' +
+          '<h3>Developer</h3>' +
+          '<a href="#/profile/' + dev.id + '" style="font-weight:600;">' + escapeHtml(dev.name) + '</a>' +
+          '<div class="muted" style="font-size:12px;margin-top:4px;">' + escapeHtml(dev.bio) + '</div>' +
+        '</div>'
+      : '');
 
   return (
     '<div class="container">' +
       '<a class="back-link" href="#/">&#8592; Back to Discover</a>' +
       hero +
       '<div class="thread-header"><h2>Devlog thread</h2></div>' +
-      threadItems +
+      '<div class="detail-grid">' +
+        '<div>' +
+          threadItems +
+        '</div>' +
+        '<div>' +
+          sponsorPanel(g) +
+          sidePanel +
+        '</div>' +
+      '</div>' +
     '</div>'
   );
 }

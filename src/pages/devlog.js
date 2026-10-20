@@ -80,7 +80,7 @@ export function renderDevlogDetail(devlogId) {
       '<div style="margin-top:12px;">' + saveButton(dl.id) + '</div>' +
     '</div>';
 
-  const sidePanel =
+    const sidePanel =
     '<div class="side-panel">' +
       '<h3>Game</h3>' +
       '<ul class="meta-list">' +
@@ -89,6 +89,7 @@ export function renderDevlogDetail(devlogId) {
         '<li><span class="k">Stage</span><span class="v">' + escapeHtml(g.stage) + '</span></li>' +
         '<li><span class="k">Devlogs</span><span class="v">' + siblings.length + '</span></li>' +
         '<li><span class="k">Feedback</span><span class="v">' + feedback.length + '</span></li>' +
+        '<li><span class="k">Funding</span><span class="v">Sponsorship · no ads</span></li>' +
       '</ul>' +
     '</div>' +
     (dev

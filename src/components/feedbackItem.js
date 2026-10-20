@@ -31,6 +31,13 @@ export function renderFeedbackItem(f) {
     seenHtml = '<span style="color:var(--muted);">Not yet seen</span>';
   }
 
+  let actedHtml = '';
+  if (f.actedOn) {
+    actedHtml = '<span class="acted-mark">&#10003; Acted on by developer</span>';
+  } else if (canMarkSeen && f.seenByDev) {
+    actedHtml = '<button data-action="mark-acted-on" data-fb="' + f.id + '">Mark as acted on</button>';
+  }
+
   return (
     '<div class="fb-item" data-fb-id="' + f.id + '">' +
       '<div class="fb-head">' +
@@ -42,6 +49,7 @@ export function renderFeedbackItem(f) {
       '<div class="fb-actions">' +
         '<button data-action="toggle-reply" data-fb="' + f.id + '">Reply</button>' +
         seenHtml +
+        actedHtml +
       '</div>' +
       (repliesHtml ? '<div class="fb-replies">' + repliesHtml + '</div>' : '') +
       '<div class="fb-reply-form hidden" data-reply-form="' + f.id + '">' +

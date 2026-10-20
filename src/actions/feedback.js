@@ -126,6 +126,22 @@ export function bindFeedbackItemActions() {
         requestRender({ scroll: false });
       });
     }
+
+    if (action === 'mark-acted-on') {
+      el.addEventListener('click', () => {
+        const fb = STATE.feedback.find((f) => f.id === fbId);
+        if (!fb) return;
+        const dl = getDevlog(fb.postId);
+        if (!dl || !isCurrentUserOwnerOfDevlog(dl)) {
+          showToast('Only the developer can mark this feedback as acted on.');
+          return;
+        }
+        fb.actedOn = !fb.actedOn;
+        if (fb.actedOn) fb.seenByDev = true;
+        saveState();
+        requestRender({ scroll: false });
+      });
+    }
   });
 
   document.querySelectorAll('[data-reply-input]').forEach((ta) => {

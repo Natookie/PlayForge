@@ -69,17 +69,27 @@ export function bindPageEvents(route) {
     bindFeedbackItemActions();
   }
 
+  if (route.name === 'game') {
+    bindSponsorPanel();
+  }
+
   if (route.name === 'create') {
     const file = document.getElementById('c-file');
     if (file) file.addEventListener('click', () => showToast('Placeholder only — no real upload in this MVP.'));
 
-    document.querySelectorAll('input[name="game-mode"]').forEach((radio) => {
+        document.querySelectorAll('input[name="game-mode"]').forEach((radio) => {
       radio.addEventListener('change', () => {
         const isExisting = document.querySelector('input[name="game-mode"]:checked').value === 'existing';
+
+        document.querySelectorAll('.mode-option').forEach((el) => {
+          const input = el.querySelector('input');
+          el.classList.toggle('selected', input.checked);
+        });
+
         document.getElementById('game-title-row').style.display = isExisting ? 'none' : '';
         document.getElementById('new-game-fields').style.display = isExisting ? 'none' : '';
         document.getElementById('new-game-fields-2').style.display = isExisting ? 'none' : '';
-        document.getElementById('existing-game-picker').classList.toggle('hidden', !isExisting);
+        document.getElementById('existing-game-picker').style.display = isExisting ? '' : 'none';
         document.getElementById('existing-game-fb-row').style.display = isExisting ? '' : 'none';
       });
     });
@@ -91,4 +101,65 @@ export function bindPageEvents(route) {
   if (route.name === 'profile' || route.name === 'my-games') {
     bindProfileEdit();
   }
+
+  if (route.name === 'portfolio') {
+    const copyBtn = document.getElementById('copy-portfolio');
+    const source = document.getElementById('portfolio-markdown');
+    if (copyBtn && source) {
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(source.value);
+          copyBtn.textContent = 'Copied ✓';
+          setTimeout(() => { copyBtn.textContent = 'Copy as Markdown'; }, 1500);
+        } catch (e) {
+          source.style.display = 'block';
+          source.select();
+          showToast('Copy failed — text is selected, press Ctrl+C.');
+        }
+      });
+    }
+  }
+}
+
+function bindSponsorPanel() {
+  const continueBtn = document.getElementById('sponsor-continue');
+  const overlay = document.getElementById('sponsor-modal-overlay');
+  const closeBtn = document.getElementById('sponsor-modal-close');
+  const okBtn = document.getElementById('sponsor-modal-ok');
+  const tiers = document.querySelectorAll('.sponsor-tier');
+
+  if (!continueBtn || !overlay) return;
+
+  tiers.forEach((t) => {
+    t.addEventListener('click', () => {
+      tiers.forEach((x) => x.classList.remove('selected'));
+      t.classList.add('selected');
+      continueBtn.disabled = false;
+    });
+  });
+
+  const openModal = () => {
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeModal = () => {
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  };
+
+  continueBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (okBtn) okBtn.addEventListener('click', closeModal);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  const onKey = (e) => {
+    if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
+      closeModal();
+      document.removeEventListener('keydown', onKey);
+    }
+  };
+  document.addEventListener('keydown', onKey);
 }

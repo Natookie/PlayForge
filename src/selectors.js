@@ -55,21 +55,45 @@ export function stalenessChip(post) {
 
 export function getTrackRecord(devId) {
   const dev = getDeveloper(devId);
-  if (!dev) return { given: 0, acknowledged: 0, withReply: 0, games: 0, ackRate: 0 };
+  if (!dev) {
+    return { given: 0, acknowledged: 0, actedOn: 0, actedRate: 0, withReply: 0, games: 0, genres: 0, ackRate: 0 };
+  }
 
   const given = STATE.feedback.filter((f) => f.authorId === devId);
   const acknowledged = given.filter((f) => f.seenByDev).length;
+  const actedOn = given.filter((f) => f.actedOn).length;
   const withReply = given.filter((f) => (f.replies || []).length > 0).length;
 
   const gameIds = new Set();
+  const genres = new Set();
   given.forEach((f) => {
     const dl = getDevlog(f.postId);
-    if (dl) gameIds.add(dl.gameId);
+    if (!dl) return;
+    gameIds.add(dl.gameId);
+    const g = getGame(dl.gameId);
+    if (g) genres.add(g.genre);
   });
 
   const total = given.length;
   const ackRate = total ? Math.round((acknowledged / total) * 100) : 0;
-  return { given: total, acknowledged, withReply, games: gameIds.size, ackRate };
+  const actedRate = total ? Math.round((actedOn / total) * 100) : 0;
+
+  return {
+    given: total,
+    acknowledged,
+    actedOn,
+    actedRate,
+    withReply,
+    games: gameIds.size,
+    genres: genres.size,
+    ackRate,
+  };
+}
+
+export function getFeedbackHistory(devId) {
+  return STATE.feedback
+    .filter((f) => f.authorId === devId)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 }
 
 export function searchAll(q) {
