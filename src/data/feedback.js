@@ -49,7 +49,6 @@ export const SEED_FEEDBACK = [
     timestamp: ago(1 * DAY + 3 * HOUR), seenByDev: false, actedOn: false, replies: [],
   },
 
-  // --- Mira's feedback history (portfolio demo) ---
   {
     id: 'fb-9', postId: 'game-2-dl-1', authorId: 'dev-1', category: 'Narrative',
     text: 'The bus setting is doing a lot of work. Consider using the arrival at a stop as a soft timer — the argument does not need to end because the conversation runs out, it ends because the bus stops.',

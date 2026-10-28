@@ -1,12 +1,8 @@
 import { STATE } from '../state.js';
 import { getPosts, getQueuePosts, isSaved } from '../selectors.js';
 import { postCard } from '../components/postCard.js';
+import { STAGES, FEEDBACK_CATS } from '../data/constants.js';
 import { welcomeStrip } from '../components/welcomeStrip.js';
-
-const GENRES = ['All', 'Action', 'Horror', 'Simulation', 'RPG', 'Strategy', 'Arcade', 'Narrative'];
-const ENGINES = ['All', 'Unity', 'Unreal', 'Godot', 'Other'];
-const STAGES = ['All', 'Concept', 'Prototype', 'Development', 'Beta', 'Released'];
-const FEEDBACK_CATS = ['All', 'Art', 'Mechanics', 'Audio', 'UX', 'Business'];
 
 export function renderDiscover() {
   const tab = STATE.discoverTab;
@@ -18,6 +14,19 @@ export function renderDiscover() {
   } else {
     base = getPosts();
   }
+
+  const usedGenres = Array.from(
+    new Set(STATE.games.map((g) => g.genre).filter(Boolean))
+  ).sort();
+
+  const usedEngines = Array.from(
+    new Set(STATE.games.map((g) => g.engine).filter(Boolean))
+  ).sort();
+
+  const genreOptions = ['All', ...usedGenres];
+  const engineOptions = ['All', ...usedEngines];
+  const stageOptions = ['All', ...STAGES];
+  const feedbackOptions = ['All', ...FEEDBACK_CATS];
 
   const filtered = base.filter((p) => {
     const f = STATE.filters;
@@ -46,10 +55,10 @@ export function renderDiscover() {
 
   const filterBar =
     '<div class="filter-bar">' +
-      '<div class="filter-group"><label>Genre</label><select id="f-genre">' + opts(GENRES, STATE.filters.genre) + '</select></div>' +
-      '<div class="filter-group"><label>Engine</label><select id="f-engine">' + opts(ENGINES, STATE.filters.engine) + '</select></div>' +
-      '<div class="filter-group"><label>Stage</label><select id="f-stage">' + opts(STAGES, STATE.filters.stage) + '</select></div>' +
-      '<div class="filter-group"><label>Feedback needed</label><select id="f-feedback">' + opts(FEEDBACK_CATS, STATE.filters.feedback) + '</select></div>' +
+      '<div class="filter-group"><label>Genre</label><select id="f-genre">' + opts(genreOptions, STATE.filters.genre) + '</select></div>' +
+      '<div class="filter-group"><label>Engine</label><select id="f-engine">' + opts(engineOptions, STATE.filters.engine) + '</select></div>' +
+      '<div class="filter-group"><label>Stage</label><select id="f-stage">' + opts(stageOptions, STATE.filters.stage) + '</select></div>' +
+      '<div class="filter-group"><label>Feedback needed</label><select id="f-feedback">' + opts(feedbackOptions, STATE.filters.feedback) + '</select></div>' +
       '<button class="filter-reset" id="f-reset">Reset</button>' +
     '</div>';
 
@@ -59,7 +68,14 @@ export function renderDiscover() {
 
   const cards = filtered.length
     ? filtered.map((p) => postCard(p, { queue: tab === 'feedback' })).join('')
-    : '<div class="empty" style="grid-column:1/-1;">' + emptyMsg + '</div>';
+    : '<div class="empty" style="grid-column:1/-1;">' +
+        '<span class="empty-mark">' +
+          '<svg viewBox="0 0 32 32" width="20" height="20" focusable="false" aria-hidden="true">' +
+            '<path d="M16 4 L20 14 L27 16 L20 19 L16 28 L13 19 L5 16 L13 14 Z" fill="currentColor" opacity="0.8"/>' +
+          '</svg>' +
+        '</span>' +
+        '<div class="empty-msg">' + emptyMsg + '</div>' +
+      '</div>'
 
   const subText = {
     recent: 'Recent development activity from indie devs. Sorted by recency, not popularity.',

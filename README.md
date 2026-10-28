@@ -7,6 +7,7 @@ The app is plain HTML, CSS, and browser JavaScript modules, with no build step o
 ## Features
 
 - Browse recent devlogs, a feedback-request queue, or saved devlogs. Filter by genre, engine, development stage, and requested feedback category.
+- Genre and engine are free-form at creation time, with a suggestion list. Filter options are derived from the games actually in state, so any value a user types becomes filterable.
 - Search for games and developers.
 - View game pages with their devlog history, and open individual devlogs with previous/next navigation.
 - Leave feedback by category, optionally structuring it around what you tried, expected, and observed. Developers can reply, mark notes as seen, or mark them as acted on.
@@ -26,21 +27,23 @@ The app uses hash routes:
 | `#/game/game-1` | Game details and devlog thread |
 | `#/devlog/game-1-dl-1` | Devlog and feedback |
 | `#/profile/dev-1` | Developer profile |
-| `#/portfolio/dev-1` | Developer feedback portfolio |
+| `#/portfolio/dev-1` | Developer feedback portfolio, with Markdown export |
 | `#/my-games` | Current demo user's profile and games |
 | `#/create` | Create a game or devlog |
 
-The `?me=dev-2` query parameter selects a different seeded demo user, for example `http://localhost/pou-hub/?me=dev-2`. This is only a demo identity selector, not authentication.
+The `?me=dev-2` query parameter selects a different seeded demo user, for example `http://localhost/playforge/?me=dev-2`. This is only a demo identity selector, not authentication.
 
 ## Run locally
 
-The project has no JavaScript package-install step. With XAMPP, put the folder in `C:\xampp\htdocs\pou-hub`, start Apache, then visit:
+The project has no JavaScript package-install step. With XAMPP, put the folder in `C:\xampp\htdocs\playforge`, start Apache, then visit:
 
-```text
-http://localhost/pou-hub/
+```
+http://localhost/playforge/
 ```
 
 Serving it through Apache/PHP enables `api/state.php` to read and write `data/state.json`. The web server needs permission to write that file. To inspect the front end without PHP, use a static HTTP server (do not open `index.html` directly as a `file:` URL); the app will fall back to its JavaScript seed data when API requests fail, and changes will not persist reliably or sync between browsers. See [SETUP.md](SETUP.md) for XAMPP and two-device setup.
+
+> **Do not use VS Code's Live Server extension.** It serves files on port 5500 as static assets and does not execute PHP, so `api/state.php` returns nothing and module imports that work fine on Apache can be blocked with a MIME type error. Always serve through Apache.
 
 ## Where content lives
 
@@ -49,6 +52,7 @@ Serving it through Apache/PHP enables `api/state.php` to read and write `data/st
 - `src/data/devlogs.js` builds demo devlogs from each game's `devlogPlan`.
 - `src/data/generators.js` supplies generated devlog titles and body text.
 - `src/data/feedback.js` defines seeded feedback and replies.
+- `src/data/constants.js` defines the suggestion lists for the free-form genre and engine fields, and the fixed option lists for development stage and feedback category. Imported by `pages/create.js` and `pages/discover.js`; if a new page needs those lists, import from here rather than hardcoding.
 - `src/state.js` loads and saves app data; `api/state.php` relays it to `data/state.json`.
 - `src/router.js` maps hash URLs such as `#/game/game-1` and `#/devlog/game-1-dl-1` to pages.
 
@@ -74,7 +78,9 @@ Add a developer object to `src/data/developers.js` with a unique `id`, `name`, `
 }
 ```
 
-Keep IDs unique and use the existing genre, engine, stage, and feedback category values where possible, since the UI filters are built around those options. `devlogPlan` controls how many generated posts are made, how many days ago the newest one appears, and the spacing in days between posts. The newest generated post is longer than the older ones.
+Keep IDs unique. Genre and engine can be any string — the filters derive their options from what's in state, so a new genre or engine becomes filterable the moment a game using it exists. `stage` should still use one of the fixed values from `src/data/constants.js` (`Concept`, `Prototype`, `Development`, `Beta`, `Released`), and `feedbackCategory` should use one of `Art`, `Mechanics`, `Audio`, `UX`, `Business` — both are fixed selects in the UI.
+
+`devlogPlan` controls how many generated posts are made, how many days ago the newest one appears, and the spacing in days between posts. The newest generated post is longer than the older ones.
 
 ### Write a specific dummy devlog
 
@@ -101,7 +107,11 @@ Seed feedback in `src/data/feedback.js`. Each item should reference an existing 
 
 ## Use the in-app form
 
-The Create Devlog page can create a game and its first post, or publish a post for an existing game owned by the selected demo user. The current user defaults to `dev-1`; use a query parameter such as `?me=dev-2` to preview another seeded profile. A new game includes genre, engine, stage, and feedback-request settings. Each post needs a title and update text, and may include a direct URL to a browser-playable video. The image/GIF attachment control is a placeholder only; it does not upload files.
+The Create Devlog page can create a game and its first post, or publish a post for an existing game owned by the selected demo user. The current user defaults to `dev-1`; use a query parameter such as `?me=dev-2` to preview another seeded profile.
+
+A new game includes genre, engine, development stage, and a feedback-request setting. Genre and engine are free-text fields with a suggestion list — you can type any value, or pick one of the suggestions. Development stage is a fixed select. The "Request feedback" checkbox controls whether the game appears in the feedback queue; when checked, a "What kind of feedback?" dropdown appears below it.
+
+Each post needs a title and update text, and may include a direct URL to a browser-playable video. The image/GIF attachment control is a placeholder only; it does not upload files.
 
 When PHP is available, form changes are saved as the full app state in `data/state.json`; open clients poll for updates every three seconds. To return to the source seed data, use **Reset demo data** in the footer. This overwrites the JSON state with the current JavaScript seeds, so do not use it if you need to preserve form-created demo content.
 
@@ -109,11 +119,14 @@ When PHP is available, form changes are saved as the full app state in `data/sta
 
 To add a page, create a renderer under `src/pages/`, register its hash pattern and render call in `src/router.js`, and add event bindings in `src/actions/bindings.js` if it needs interactions. Reuse the existing selectors and components where possible. For new form behavior, keep writes in the relevant action module and update `STATE` through the functions in `src/state.js`.
 
+If a new form needs a suggestion list (genres, engines, or similar), add the list to `src/data/constants.js` rather than hardcoding it in the page, so the form and any future data-derived filter stay in sync.
+
 ## Prototype limitations
 
 - There is no authentication or authorization; changing `?me=` only selects a seeded demo profile.
 - The PHP endpoint stores the entire app state as one JSON document. It is intended for a local demo, not concurrent production use; overlapping writes can replace each other's changes.
 - The API currently allows cross-origin requests and has no access control. Do not expose it publicly with real user data.
+- Free-form genre and engine values are stored verbatim. There is no normalization: typing "Simulation" and "simulation" produces two separate filter options. This is deliberate for the prototype and would need a moderation or normalization pass before real use.
 - Game and devlog artwork is generated placeholder imagery; the Create Devlog image/GIF attachment control does not upload files. Video playback uses a supplied direct URL.
 - The sponsorship panel is a visual preview only; there is no payment integration.
 - If `data/state.json` already contains state, it takes precedence over the JavaScript seeds at startup. Editing seed files alone will not change that saved state until you reset it or remove the saved state while the app is stopped.

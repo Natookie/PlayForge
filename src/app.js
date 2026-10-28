@@ -4,12 +4,20 @@ import { setupSearch } from './ui/search.js';
 import { showToast } from './ui/toast.js';
 import { initTheme, toggleTheme } from './ui/theme.js';
 import { clearWelcomeExpanded } from './components/welcomeStrip.js';
+import { setupScrollReveal } from './ui/scrollReveal.js';
+import { initNavIndicator } from './ui/navIndicator.js';
 
-onRender((opts) => render(opts));
-window.addEventListener('hashchange', () => render());
+function renderWithReveal(opts) {
+  render(opts);
+  setupScrollReveal();
+}
+
+onRender((opts) => renderWithReveal(opts));
+window.addEventListener('hashchange', () => renderWithReveal());
 
 window.addEventListener('DOMContentLoaded', async () => {
   initTheme();
+  initNavIndicator();
 
   const themeBtn = document.getElementById('theme-toggle');
   if (themeBtn) {
@@ -23,10 +31,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   await loadState();
   setupSearch();
-  render({ scroll: true });
+  renderWithReveal({ scroll: true });
 
   startPolling(() => {
-    render({ scroll: false });
+    renderWithReveal({ scroll: false });
     showToast('Updated from another device');
   });
 
@@ -35,7 +43,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     resetBtn.addEventListener('click', async () => {
       await resetDemo();
       clearWelcomeExpanded();
-      render({ scroll: true });
+      renderWithReveal({ scroll: true });
       showToast('Demo data reset.');
     });
   }

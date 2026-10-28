@@ -12,24 +12,81 @@ function markInvalid(id, invalid) {
 }
 
 export function publishDevlog(btn) {
-  const mode = (document.querySelector('input[name="game-mode"]:checked') || {}).value || 'new';
-  const dlTitle = document.getElementById('c-title').value.trim();
-  const desc = document.getElementById('c-desc').value.trim();
-  const request = document.getElementById('c-request').checked;
-  const videoUrlRaw = (document.getElementById('c-video') || {}).value || '';
-  const videoUrl = videoUrlRaw.trim();
+  const modeEl = document.querySelector('input[name="game-mode"]:checked');
+  const mode = modeEl ? modeEl.value : 'new';
+
+  const dlTitleEl = document.getElementById('c-title');
+  const descEl = document.getElementById('c-desc');
+  const requestEl = document.getElementById('c-request');
+  const videoEl = document.getElementById('c-video');
+  const fbCatEl = document.getElementById('c-fbcat');
+
+  const dlTitle = dlTitleEl ? dlTitleEl.value.trim() : '';
+  const desc = descEl ? descEl.value.trim() : '';
+  const request = requestEl ? requestEl.checked : false;
+  const videoUrl = videoEl ? videoEl.value.trim() : '';
+  const fbCat = fbCatEl ? fbCatEl.value : 'Mechanics';
+
+  let gameTitle = '';
+  let genre = '';
+  let engine = '';
+  let stage = '';
+  let existingGameId = '';
+
+  if (mode === 'new') {
+    const gameTitleEl = document.getElementById('c-game');
+    const genreEl = document.getElementById('c-genre');
+    const engineEl = document.getElementById('c-engine');
+    const stageEl = document.getElementById('c-stage');
+
+    gameTitle = gameTitleEl ? gameTitleEl.value.trim() : '';
+    genre = genreEl ? genreEl.value.trim() : '';
+    engine = engineEl ? engineEl.value.trim() : '';
+    stage = stageEl ? stageEl.value : 'Prototype';
+  } else {
+    const existingGameEl = document.getElementById('c-existing-game');
+    existingGameId = existingGameEl ? existingGameEl.value : '';
+  }
 
   let ok = true;
-  if (mode === 'new') {
-    const gameTitle = document.getElementById('c-game').value.trim();
-    if (!gameTitle) { showFieldError('c-game-error', true); markInvalid('c-game', true); ok = false; }
-    else { showFieldError('c-game-error', false); markInvalid('c-game', false); }
+
+  if (mode === 'new' && !gameTitle) {
+    showFieldError('c-game-error', true);
+    markInvalid('c-game', true);
+    ok = false;
+  } else {
+    showFieldError('c-game-error', false);
+    markInvalid('c-game', false);
   }
-  if (!dlTitle) { showFieldError('c-title-error', true); markInvalid('c-title', true); ok = false; }
-  else { showFieldError('c-title-error', false); markInvalid('c-title', false); }
-  if (!desc) { showFieldError('c-desc-error', true); markInvalid('c-desc', true); ok = false; }
-  else { showFieldError('c-desc-error', false); markInvalid('c-desc', false); }
-  if (!ok) { showToast('Please fill the highlighted fields.'); return; }
+
+  if (!dlTitle) {
+    showFieldError('c-title-error', true);
+    markInvalid('c-title', true);
+    ok = false;
+  } else {
+    showFieldError('c-title-error', false);
+    markInvalid('c-title', false);
+  }
+
+  if (!desc) {
+    showFieldError('c-desc-error', true);
+    markInvalid('c-desc', true);
+    ok = false;
+  } else {
+    showFieldError('c-desc-error', false);
+    markInvalid('c-desc', false);
+  }
+
+  if (!ok) {
+    showToast('Please fill the highlighted fields.');
+    return;
+  }
+
+  if (videoUrl && !/^https?:\/\/.+/i.test(videoUrl)) {
+    if (videoEl) videoEl.classList.add('invalid');
+    showToast('Video URL should start with http:// or https://');
+    return;
+  }
 
   btn.disabled = true;
   btn.textContent = 'Publishing…';
@@ -39,27 +96,20 @@ export function publishDevlog(btn) {
     const me = getCurrentUser();
 
     let game;
+
     if (mode === 'existing') {
-      const gameId = document.getElementById('c-existing-game').value;
-      game = getGame(gameId);
+      game = getGame(existingGameId);
       if (!game) {
         showToast('Selected game not found.');
         btn.disabled = false;
         btn.textContent = 'Publish Devlog';
         return;
       }
-      const cat = document.getElementById('c-existing-fbcat').value;
       if (request) {
         game.needsFeedback = true;
-        game.feedbackCategory = cat;
+        game.feedbackCategory = fbCat;
       }
     } else {
-      const gameTitle = document.getElementById('c-game').value.trim();
-      const genre = document.getElementById('c-genre').value;
-      const engine = document.getElementById('c-engine').value;
-      const stage = document.getElementById('c-stage').value;
-      const fbCat = document.getElementById('c-fbcat').value;
-
       game = {
         id: 'game-' + now,
         title: gameTitle,
@@ -86,8 +136,11 @@ export function publishDevlog(btn) {
       videoUrl: videoUrl || undefined,
     });
 
+    STATE._createMode = null;
+
     saveState();
     showToast('Devlog published.');
+
     window.location.hash = '#/devlog/' + newDevlogId;
-  }, 300);
+  }, 150);
 }

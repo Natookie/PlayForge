@@ -11,7 +11,7 @@ export function postCard(post, opts) {
   const chip = opts.queue ? stalenessChip(post) : null;
 
   return (
-    '<div class="post-card' + (opts.queue ? ' queue-card' : '') + '">' +
+    '<div class="post-card reveal' + (opts.queue ? ' queue-card' : '') + '">' +
       '<a href="#/devlog/' + dl.id + '" style="display:flex;flex-direction:column;flex:1;">' +
         '<div class="thumb">' +
           coverArt(g) +

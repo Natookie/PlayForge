@@ -1,6 +1,7 @@
 import { escapeHtml, hashString } from '../utils.js';
 
 const COVER_PALETTES = [
+  { bg: '#1a2236', mid: '#243349', fg: '#6fadfa', accent: '#c3d9ff' },
   { bg: '#1b2838', mid: '#26405a', fg: '#66c0f4', accent: '#c7d5e0' },
   { bg: '#2b1b1b', mid: '#3d2525', fg: '#e57373', accent: '#ffd7d7' },
   { bg: '#1e2a1e', mid: '#2a3d2a', fg: '#81c784', accent: '#dcedc8' },

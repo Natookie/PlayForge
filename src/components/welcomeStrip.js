@@ -34,26 +34,28 @@ export function clearWelcomeExpanded() {
 export function welcomeStrip() {
   const expanded = readExpanded();
 
-  const duck =
-    '<svg viewBox="0 0 32 32" width="26" height="26" focusable="false" aria-hidden="true">' +
-      '<path d="M22 8.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z" fill="currentColor"/>' +
-      '<path d="M10.5 12.5c0-1 .8-1.8 1.8-1.8h4.3c2.6 0 4.7 2.1 4.7 4.7v.3c0 3.6-2.9 6.5-6.5 6.5h-1.2c-2 0-3.6-1.6-3.6-3.6v-2.1c0-.9.7-1.6 1.6-1.6h4.1v-1.2a1.2 1.2 0 0 0-1.2-1.2h-2.9c-.6 0-1.1-.5-1.1-1.1z" fill="currentColor"/>' +
-      '<path d="M6.5 14.5l3 2-3 2z" fill="currentColor"/>' +
-    '</svg>';
-
-  const header =
-    '<div class="welcome-head">' +
-      '<div class="welcome-mark">' + duck + '</div>' +
-      '<h2 class="welcome-title">Welcome to PlayForge</h2>' +
-      '<button class="welcome-toggle" id="welcome-toggle" type="button" aria-expanded="' + (expanded ? 'true' : 'false') + '">' +
-        (expanded ? 'Show less ▴' : 'Show more ▾') +
-      '</button>' +
+  const forge =
+    '<div class="forge-mark">' +
+      '<svg viewBox="0 0 64 64" width="56" height="56" focusable="false" aria-hidden="true">' +
+        '<path d="M32 6 L38 26 L58 32 L38 38 L32 58 L26 38 L6 32 L26 26 Z" ' +
+              'fill="currentColor" opacity="0.95"/>' +
+        '<path d="M32 22 L35 29 L42 32 L35 35 L32 42 L29 35 L22 32 L29 29 Z" ' +
+              'fill="var(--panel)" opacity="0.55"/>' +
+        '<circle cx="32" cy="32" r="1.8" fill="var(--accent)"/>' +
+      '</svg>' +
     '</div>';
 
-  const intro =
-    '<p class="welcome-intro">' +
-      'A place for game developers to share what they are building and get useful feedback before release.' +
-    '</p>';
+  const head =
+    '<div class="welcome-head">' +
+      forge +
+      '<div class="welcome-head-text">' +
+        '<h2 class="welcome-title">Welcome to Playforge</h2>' +
+        '<p class="welcome-intro">A place for game developers to share what they are building and get useful feedback before release.</p>' +
+      '</div>' +
+      '<button class="welcome-toggle" id="welcome-toggle" type="button" aria-expanded="' + (expanded ? 'true' : 'false') + '">' +
+        (expanded ? 'Show less' : 'Show more') +
+      '</button>' +
+    '</div>';
 
   const detail = expanded
     ? '<div class="welcome-detail">' +
@@ -83,8 +85,7 @@ export function welcomeStrip() {
 
   return (
     '<div class="welcome-strip' + (expanded ? ' expanded' : '') + '">' +
-      header +
-      intro +
+      head +
       detail +
     '</div>'
   );

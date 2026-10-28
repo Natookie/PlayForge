@@ -6,7 +6,6 @@ import { showToast } from '../ui/toast.js';
 import { isWelcomeExpanded, setWelcomeExpanded } from '../components/welcomeStrip.js';
 
 export function bindPageEvents(route) {
-  //Welcome panel
   const welcomeToggle = document.getElementById('welcome-toggle');
   if (welcomeToggle) {
     welcomeToggle.addEventListener('click', () => {
@@ -24,7 +23,6 @@ export function bindPageEvents(route) {
     });
   }
 
-  //Discover filters
   const bind = (id, key) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -75,24 +73,28 @@ export function bindPageEvents(route) {
 
   if (route.name === 'create') {
     const file = document.getElementById('c-file');
-    if (file) file.addEventListener('click', () => showToast('Placeholder only — no real upload in this MVP.'));
+    if (file) file.addEventListener('click', () => {
+      showToast('Placeholder only — no real upload in this MVP.');
+    });
 
-        document.querySelectorAll('input[name="game-mode"]').forEach((radio) => {
+    document.querySelectorAll('input[name="game-mode"]').forEach((radio) => {
       radio.addEventListener('change', () => {
-        const isExisting = document.querySelector('input[name="game-mode"]:checked').value === 'existing';
-
-        document.querySelectorAll('.mode-option').forEach((el) => {
-          const input = el.querySelector('input');
-          el.classList.toggle('selected', input.checked);
-        });
-
-        document.getElementById('game-title-row').style.display = isExisting ? 'none' : '';
-        document.getElementById('new-game-fields').style.display = isExisting ? 'none' : '';
-        document.getElementById('new-game-fields-2').style.display = isExisting ? 'none' : '';
-        document.getElementById('existing-game-picker').style.display = isExisting ? '' : 'none';
-        document.getElementById('existing-game-fb-row').style.display = isExisting ? '' : 'none';
+        const checked = document.querySelector('input[name="game-mode"]:checked');
+        if (!checked) return;
+        STATE._createMode = checked.value;
+        requestRender({ scroll: false });
       });
     });
+
+    const requestEl = document.getElementById('c-request');
+    const fbCatRow = document.getElementById('feedback-cat-row');
+    if (requestEl && fbCatRow) {
+      const updateFbCatVisibility = () => {
+        fbCatRow.style.display = requestEl.checked ? '' : 'none';
+      };
+      requestEl.addEventListener('change', updateFbCatVisibility);
+      updateFbCatVisibility();
+    }
 
     const pub = document.getElementById('c-publish');
     if (pub) pub.addEventListener('click', () => publishDevlog(pub));

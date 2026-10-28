@@ -7,6 +7,7 @@ import { renderCreate } from './pages/create.js';
 import { renderProfile, renderMyGames } from './pages/profile.js';
 import { renderPortfolio } from './pages/portfolio.js';
 import { bindPageEvents } from './actions/bindings.js';
+import { initNavIndicator, updateNavIndicator } from './ui/navIndicator.js';
 
 function parseHash() {
   const raw = window.location.hash.replace(/^#/, '') || '/';
@@ -62,6 +63,7 @@ export function render(opts) {
   app.innerHTML = html;
 
   updateActiveNav(route);
+  updateNavIndicator();
   updateHeaderAvatar();
 
   if (opts.scroll === true) {

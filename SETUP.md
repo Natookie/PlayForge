@@ -32,7 +32,7 @@ loaded by the browser. PHP is used only for the shared state relay.
 
 - XAMPP for Windows, or any equivalent stack that provides Apache and PHP.
 - The project folder placed inside the web root, typically
-  `C:\xampp\htdocs\pou-hub`.
+  `C:\xampp\htdocs\playforge`.
 - A modern browser.
 
 **Device B** (the client) needs:
@@ -56,11 +56,11 @@ is only a browser pointed at device A's IP.
 ## 2. Set up the host machine (device A)
 
 1. Install XAMPP if you have not already.
-2. Copy the project folder to `C:\xampp\htdocs\pou-hub`.
+2. Copy the project folder to `C:\xampp\htdocs\playforge`.
 
    The folder name matters: it must not contain spaces, and the path must
-   match the URLs used later in this document. `pou-hub` (hyphen, no space)
-   is the recommended name.
+   match the URLs used later in this document. `playforge` (lowercase, no
+   space) is the recommended name.
 
 3. Start **Apache** from the XAMPP control panel. The status indicator for
    Apache should turn green. MySQL is not required for this project.
@@ -82,16 +82,18 @@ device A itself.
 
 Open these URLs on device A, in order:
 
-### 3a. `http://localhost/pou-hub/`
+### 3a. `http://localhost/playforge/`
 
 Expected: the Play Forge Discover feed loads with seeded games and devlogs.
 
 If this fails, Apache is not running or the folder is not where you think it
 is. Fix this before continuing.
 
-### 3b. `http://localhost/pou-hub/api/state.php`
+### 3b. `http://localhost/playforge/api/state.php`
 
-Expected: a JSON document. It will look like:
+Expected: a JSON document. On first run, before any state has been saved, it
+returns `{"version":0,"state":null}`. After the app saves its seed data, it
+will look like:
 
 ```json
 {"version":1,"updatedAt":"2026-09-29T16:04:28+02:00","state":{"games":[...]}}
@@ -102,7 +104,7 @@ being executed. Check the XAMPP control panel and the Apache error log.
 
 If you see a 404 page, the file is not at the path you think it is.
 
-### 3c. `http://192.168.100.181/pou-hub/`
+### 3c. `http://192.168.100.181/playforge/`
 
 Replace `192.168.100.181` with your actual IPv4 address. Expected: the same
 Discover feed as 3a.
@@ -183,7 +185,7 @@ will make two different subnets see each other.
 On device B's browser, open:
 
 ```text
-http://192.168.100.181/pou-hub/?me=dev-2
+http://192.168.100.181/playforge/?me=dev-2
 ```
 
 Replace `192.168.100.181` with device A's actual IP.
@@ -202,8 +204,8 @@ but two devices do not, the issue is the network, not the code.
 Open two tabs on device A:
 
 ```text
-Tab 1: http://localhost/pou-hub/?me=dev-1
-Tab 2: http://localhost/pou-hub/?me=dev-2
+Tab 1: http://localhost/playforge/?me=dev-1
+Tab 2: http://localhost/playforge/?me=dev-2
 ```
 
 In Tab 1, open any devlog and submit a piece of feedback. Watch Tab 2.
@@ -233,13 +235,13 @@ With both devices on the app:
 **Device A:**
 
 ```text
-http://192.168.100.181/pou-hub/?me=dev-1
+http://192.168.100.181/playforge/?me=dev-1
 ```
 
 **Device B:**
 
 ```text
-http://192.168.100.181/pou-hub/?me=dev-2
+http://192.168.100.181/playforge/?me=dev-2
 ```
 
 Both URLs use device A's IP. Device B never uses `localhost` — `localhost`
@@ -308,15 +310,15 @@ problem, not an Apache problem. Recheck [section 5](#5-confirm-both-devices-are-
 **10b.** From device B, open `http://192.168.100.181/`.
 
 - If the XAMPP welcome page loads, the network and firewall are fine, and
-  the problem is the URL path (`/pou-hub/`).
+  the problem is the URL path (`/playforge/`).
 - If it times out or refuses, the problem is the firewall
   ([section 4](#4-allow-apache-through-the-firewall)) or Apache binding
   ([section 3](#3-verify-the-server-locally)).
 
-**10c.** From device B, open `http://192.168.100.181/pou-hub/api/state.php`.
+**10c.** From device B, open `http://192.168.100.181/playforge/api/state.php`.
 
 - JSON appears → the server is reachable and PHP is running. Open
-  `http://192.168.100.181/pou-hub/` and the app should load.
+  `http://192.168.100.181/playforge/` and the app should load.
 - PHP source code appears (starting with `<?php`) → PHP is not executing for
   requests to that host. Rare on XAMPP; check the Apache configuration or
   reinstall XAMPP.
@@ -329,16 +331,16 @@ problem, not an Apache problem. Recheck [section 5](#5-confirm-both-devices-are-
 | --- | --- | --- |
 | "This site can't be reached" or timeout | Windows Firewall blocking port 80 | [Section 4](#4-allow-apache-through-the-firewall) |
 | `ERR_CONNECTION_REFUSED` | Apache not running, or bound to localhost only | Start Apache; check `Listen` in `httpd.conf` ([section 3](#3-verify-the-server-locally)) |
-| `http://<ip>/` loads but `/pou-hub/` is 404 | Folder name mismatch | Confirm the folder is `C:\xampp\htdocs\pou-hub` (hyphen, no space) |
+| `http://<ip>/` loads but `/playforge/` is 404 | Folder name mismatch | Confirm the folder is `C:\xampp\htdocs\playforge` (lowercase, no space) |
 | App loads on device B but shows no data | Fetch to `api/state.php` failing | Open DevTools → Network on device B, inspect the `state.php` request |
 | Works on device A, not device B | Almost always the firewall | [Section 4](#4-allow-apache-through-the-firewall); also check antivirus |
-| `JSON.parse: unexpected character at line 1` | Page served from Live Server or `file://` instead of Apache | Load through `http://localhost/pou-hub/`, not port 5500 or a local file path |
+| `JSON.parse: unexpected character at line 1` | Page served from Live Server or `file://` instead of Apache | Load through `http://localhost/playforge/`, not port 5500 or a local file path |
 | Data appears stale on device B | Polling not firing | DevTools → Network, check for a `state.php` request every ~3 seconds |
 | Both devices fight for the same profile | Both use the same `?me=` value | Use `?me=dev-1` on one and `?me=dev-2` on the other ([section 9](#9-understanding-the-two-demo-users)) |
 
 ### Apache binding
 
-If opening `http://192.168.100.181/pou-hub/` on device A fails, open
+If opening `http://192.168.100.181/playforge/` on device A fails, open
 `C:\xampp\apache\conf\httpd.conf` and find the `Listen` line. If it reads
 `Listen 127.0.0.1:80`, change it to `Listen 80`, save, and restart Apache.
 This tells Apache to accept connections on all network interfaces, not just
@@ -373,7 +375,7 @@ If the button is unavailable (for example, the footer is not visible), you
 can reset manually:
 
 1. Stop Apache.
-2. Delete `C:\xampp\htdocs\pou-hub\data\state.json`.
+2. Delete `C:\xampp\htdocs\playforge\data\state.json`.
 3. Start Apache.
 4. Reload the app. The next page load will seed from JavaScript and write a
    fresh `state.json`.
