@@ -1,7 +1,10 @@
+import { sfx } from '../audio/sfx.js';
+
 let toastEl = null;
 let toastTimer = null;
 
-export function showToast(msg) {
+export function showToast(msg, kind) {
+  sfx(kind || 'notification');
   if (!toastEl) {
     toastEl = document.createElement('div');
     toastEl.className = 'toast';

@@ -1,6 +1,7 @@
 import { STATE, saveState, requestRender } from '../state.js';
 import { getCurrentUser, getDevlog, isCurrentUserOwnerOfDevlog } from '../selectors.js';
 import { showToast } from '../ui/toast.js';
+import { sfx } from '../audio/sfx.js';
 
 function clearFeedbackErrors() {
   const err = document.getElementById('fb-text-error');
@@ -19,7 +20,7 @@ function composeFeedbackText(base, tried, expected, happened) {
   return parts.join('\n');
 }
 
-export function submitFeedback(devlogId) {
+export async function submitFeedback(devlogId) {
   const catEl = document.getElementById('fb-cat');
   const textEl = document.getElementById('fb-text');
   const errEl = document.getElementById('fb-text-error');
@@ -38,6 +39,7 @@ export function submitFeedback(devlogId) {
     errEl.classList.remove('hidden');
     textEl.classList.add('invalid');
     textEl.focus();
+    sfx('error');
     return;
   }
   if (raw && raw.length < 8 && !structured) {
@@ -45,6 +47,7 @@ export function submitFeedback(devlogId) {
     errEl.classList.remove('hidden');
     textEl.classList.add('invalid');
     textEl.focus();
+    sfx('error');
     return;
   }
 
@@ -53,22 +56,31 @@ export function submitFeedback(devlogId) {
   btn.disabled = true;
   btn.textContent = 'Sending…';
 
-  setTimeout(() => {
-    const me = getCurrentUser();
-    STATE.feedback.push({
-      id: 'fb-' + Date.now(),
-      postId: devlogId,
-      authorId: me.id,
-      category: catEl.value,
-      text: composed,
-      timestamp: new Date().toISOString(),
-      seenByDev: false,
-      replies: [],
-    });
-    saveState();
+  await new Promise((r) => setTimeout(r, 150));
+
+  const me = getCurrentUser();
+  const newFeedbackId = 'fb-' + Date.now();
+  STATE.feedback.push({
+    id: 'newFeedbackId',
+    postId: devlogId,
+    authorId: me.id,
+    category: catEl.value,
+    text: composed,
+    timestamp: new Date().toISOString(),
+    seenByDev: false,
+    replies: [],
+  });
+  STATE._lastSubmittedFeedbackId = newFeedbackId;
+
+  const result = await saveState();
+  if (result.ok) {
     showToast('Feedback sent. Thanks!');
-    requestRender({ scroll: false });
-  }, 250);
+    sfx('success');
+  } else {
+    showToast('Saved locally — will sync when the server is back.');
+    sfx('warning');
+  }
+  requestRender({ scroll: false });
 }
 
 export function bindFeedbackItemActions() {
@@ -84,12 +96,15 @@ export function bindFeedbackItemActions() {
         if (!form.classList.contains('hidden')) {
           const input = form.querySelector('textarea');
           if (input) input.focus();
+          sfx('expand');
+        } else {
+          sfx('collapse');
         }
       });
     }
 
     if (action === 'submit-reply') {
-      el.addEventListener('click', () => {
+      el.addEventListener('click', async () => {
         const input = document.querySelector('[data-reply-input="' + fbId + '"]');
         if (!input) return;
         const text = input.value.trim();
@@ -107,13 +122,15 @@ export function bindFeedbackItemActions() {
           timestamp: new Date().toISOString(),
         });
         if (amOwner) fb.seenByDev = true;
-        saveState();
+        const result = await saveState();
+        if (!result.ok) showToast('Reply saved locally — will sync when the server is back.');
+        sfx(result.ok ? 'success' : 'warning');
         requestRender({ scroll: false });
       });
     }
 
     if (action === 'mark-seen') {
-      el.addEventListener('click', () => {
+      el.addEventListener('click', async () => {
         const fb = STATE.feedback.find((f) => f.id === fbId);
         if (!fb) return;
         const dl = getDevlog(fb.postId);
@@ -122,13 +139,15 @@ export function bindFeedbackItemActions() {
           return;
         }
         fb.seenByDev = !fb.seenByDev;
-        saveState();
+        const result = await saveState();
+        if (!result.ok) showToast('Change saved locally — will sync when the server is back.');
+        sfx(result.ok ? 'select' : 'warning');
         requestRender({ scroll: false });
       });
     }
 
     if (action === 'mark-acted-on') {
-      el.addEventListener('click', () => {
+      el.addEventListener('click', async () => {
         const fb = STATE.feedback.find((f) => f.id === fbId);
         if (!fb) return;
         const dl = getDevlog(fb.postId);
@@ -138,7 +157,9 @@ export function bindFeedbackItemActions() {
         }
         fb.actedOn = !fb.actedOn;
         if (fb.actedOn) fb.seenByDev = true;
-        saveState();
+        const result = await saveState();
+        if (!result.ok) showToast('Change saved locally — will sync when the server is back.');
+        sfx(result.ok ? 'success' : 'warning');
         requestRender({ scroll: false });
       });
     }

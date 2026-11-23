@@ -3,7 +3,7 @@ import { escapeHtml, timeAgo } from '../utils.js';
 import { getDevlog, getGame, getDeveloper, getFeedbackFor, devName } from '../selectors.js';
 import { imagePlaceholder } from '../components/imagePlaceholder.js';
 import { feedbackBadge, saveButton } from '../components/badges.js';
-import { coverArt } from '../components/coverArt.js';
+import { devlogImage } from '../components/devlogImage.js';
 import { renderFeedbackItem } from '../components/feedbackItem.js';
 
 const FEEDBACK_CATS = ['All', 'Art', 'Mechanics', 'Audio', 'UX', 'Business'];
@@ -23,6 +23,14 @@ export function renderDevlogDetail(devlogId) {
   const prev = myIdx > 0 ? siblings[myIdx - 1] : null;
   const next = myIdx >= 0 && myIdx < siblings.length - 1 ? siblings[myIdx + 1] : null;
 
+  const breadcrumb =
+    '<div class="devlog-breadcrumb">' +
+      '<a class="back-link" href="#/">&larr; Back to Discover</a>' +
+      '<span class="breadcrumb-sep" aria-hidden="true">&middot;</span>' +
+      '<span class="breadcrumb-context">' + escapeHtml(g.title) + ' / Devlog ' + (myIdx + 1) + ' of ' + siblings.length + '</span>' +
+      '<a class="btn btn-secondary btn-sm breadcrumb-thread" href="#/game/' + g.id + '">View thread &rarr;</a>' +
+    '</div>';
+
   const feedbackHtml = feedback.length
     ? feedback.map(renderFeedbackItem).join('')
     : '<div class="empty">No feedback yet — this dev is waiting for a fresh pair of eyes.</div>';
@@ -33,12 +41,32 @@ export function renderDevlogDetail(devlogId) {
         '<div class="rb-title">' + escapeHtml(g.feedbackCategory) + '</div>' +
         '<button class="btn btn-feedback" id="open-feedback">Give Feedback</button>' +
         '<div class="rb-hint">Good feedback mentions <strong>what you tried</strong>, <strong>what you expected</strong>, and <strong>what actually happened</strong>.</div>' +
+        '<div class="request-panel-actions">' + saveButton(dl.id) + '</div>' +
       '</div>'
     : '<div class="request-sticky">' +
         '<div class="rb-label" style="color:var(--muted);">Feedback</div>' +
         '<div class="rb-title" style="font-size:14px;">Not currently requesting</div>' +
         '<div class="rb-hint">This dev is heads-down. You can still leave a note below.</div>' +
+        '<div class="request-panel-actions">' + saveButton(dl.id) + '</div>' +
       '</div>';
+
+  const siblingPanel = siblings.length > 1
+    ? '<div class="side-panel">' +
+        '<h3>More from ' + escapeHtml(g.title) + '</h3>' +
+        (prev
+          ? '<div class="sibling-link">' +
+              '<span class="muted">&larr; Previous</span>' +
+              '<a href="#/devlog/' + prev.id + '">' + escapeHtml(prev.title) + '</a>' +
+            '</div>'
+          : '') +
+        (next
+          ? '<div class="sibling-link">' +
+              '<span class="muted">Next &rarr;</span>' +
+              '<a href="#/devlog/' + next.id + '">' + escapeHtml(next.title) + '</a>' +
+            '</div>'
+          : '') +
+      '</div>'
+    : '';
 
   const feedbackForm =
     '<div id="feedback-form-wrap" class="hidden" style="margin-top:18px;">' +
@@ -68,19 +96,7 @@ export function renderDevlogDetail(devlogId) {
       '</div>' +
     '</div>';
 
-  const threadNav =
-    '<div class="side-panel">' +
-      '<h3>In this thread</h3>' +
-      '<div style="font-size:13px;margin-bottom:8px;">' +
-        '<a href="#/game/' + g.id + '" style="color:var(--accent);font-weight:600;">' + escapeHtml(g.title) + '</a>' +
-        ' · Devlog ' + (myIdx + 1) + ' of ' + siblings.length +
-      '</div>' +
-      (prev ? '<div style="font-size:12px;margin-bottom:4px;"><span class="muted">← Previous:</span> <a href="#/devlog/' + prev.id + '" style="color:#c8cfd9;">' + escapeHtml(prev.title) + '</a></div>' : '') +
-      (next ? '<div style="font-size:12px;"><span class="muted">Next →:</span> <a href="#/devlog/' + next.id + '" style="color:#c8cfd9;">' + escapeHtml(next.title) + '</a></div>' : '') +
-      '<div style="margin-top:12px;">' + saveButton(dl.id) + '</div>' +
-    '</div>';
-
-    const sidePanel =
+  const sidePanel =
     '<div class="side-panel">' +
       '<h3>Game</h3>' +
       '<ul class="meta-list">' +
@@ -89,7 +105,7 @@ export function renderDevlogDetail(devlogId) {
         '<li><span class="k">Stage</span><span class="v">' + escapeHtml(g.stage) + '</span></li>' +
         '<li><span class="k">Devlogs</span><span class="v">' + siblings.length + '</span></li>' +
         '<li><span class="k">Feedback</span><span class="v">' + feedback.length + '</span></li>' +
-        '<li><span class="k">Funding</span><span class="v">Sponsorship · no ads</span></li>' +
+        '<li><span class="k">Funding</span><span class="v">Sponsorship &middot; no ads</span></li>' +
       '</ul>' +
     '</div>' +
     (dev
@@ -102,13 +118,13 @@ export function renderDevlogDetail(devlogId) {
 
   return (
     '<div class="container">' +
-      '<a class="back-link" href="#/game/' + g.id + '">&#8592; Back to ' + escapeHtml(g.title) + '</a>' +
+      breadcrumb +
       '<div class="detail-grid">' +
         '<div>' +
           '<div class="detail-main">' +
             '<h1>' + escapeHtml(g.title) + '</h1>' +
             '<div class="detail-dev">by <a href="#/profile/' + g.developerId + '">' + escapeHtml(devName(g.developerId)) + '</a></div>' +
-            coverArt(g) +
+            devlogImage(dl, g) +
             '<h2 class="devlog-heading">' + escapeHtml(dl.title) + '</h2>' +
             '<div class="devlog-body">' + escapeHtml(dl.content) + '</div>' +
             (dl.videoUrl
@@ -123,7 +139,7 @@ export function renderDevlogDetail(devlogId) {
           '<div class="section-title">Feedback <span class="count">' + feedback.length + '</span></div>' +
           feedbackHtml +
         '</div>' +
-        '<div>' + requestPanel + threadNav + sidePanel + '</div>' +
+        '<div>' + requestPanel + siblingPanel + sidePanel + '</div>' +
       '</div>' +
     '</div>'
   );

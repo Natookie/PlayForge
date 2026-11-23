@@ -44,6 +44,15 @@ export function getQueuePosts() {
     });
 }
 
+export function stalenessLevel(post) {
+  const days = (Date.now() - new Date(post.devlog.timestamp).getTime()) / (24 * 3600 * 1000);
+  const responses = post.feedback.length;
+  if (responses === 0 && days >= 3) return 'crit';
+  if (responses === 0) return 'crit';
+  if (responses <= 2 && days >= 2) return 'warn';
+  return 'fresh';
+}
+
 export function stalenessChip(post) {
   const days = (Date.now() - new Date(post.devlog.timestamp).getTime()) / (24 * 3600 * 1000);
   const responses = post.feedback.length;

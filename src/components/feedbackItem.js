@@ -1,4 +1,5 @@
 import { escapeHtml, timeAgo } from '../utils.js';
+import { STATE } from '../state.js';
 import { devHandle, getDevlog, getGame, isCurrentUserOwnerOfDevlog } from '../selectors.js';
 
 export function renderFeedbackItem(f) {
@@ -7,6 +8,9 @@ export function renderFeedbackItem(f) {
   const ownerId = game ? game.developerId : null;
 
   const canMarkSeen = dl ? isCurrentUserOwnerOfDevlog(dl) : false;
+
+  const isFresh = STATE._lastSubmittedFeedbackId === f.id;
+  const freshAttr = isFresh ? ' data-fresh="1"' : '';
 
   const repliesHtml = (f.replies || []).map((r) => {
     const isDevReply = ownerId && r.authorId === ownerId;
@@ -39,7 +43,7 @@ export function renderFeedbackItem(f) {
   }
 
   return (
-    '<div class="fb-item" data-fb-id="' + f.id + '">' +
+    '<div class="fb-item" data-fb-id="' + f.id + '"' + freshAttr + '>' +
       '<div class="fb-head">' +
         '<span class="fb-author">' + escapeHtml(devHandle(f.authorId)) + '</span>' +
         '<span class="tag">' + escapeHtml(f.category) + '</span>' +

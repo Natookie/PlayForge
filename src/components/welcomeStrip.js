@@ -49,7 +49,7 @@ export function welcomeStrip() {
     '<div class="welcome-head">' +
       forge +
       '<div class="welcome-head-text">' +
-        '<h2 class="welcome-title">Welcome to Playforge</h2>' +
+        '<h2 class="welcome-title">Welcome to PlayForge</h2>' +
         '<p class="welcome-intro">A place for game developers to share what they are building and get useful feedback before release.</p>' +
       '</div>' +
       '<button class="welcome-toggle" id="welcome-toggle" type="button" aria-expanded="' + (expanded ? 'true' : 'false') + '">' +

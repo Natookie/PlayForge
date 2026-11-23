@@ -104,13 +104,28 @@ export function renderPortfolio(devId) {
     '</div>';
 
   const stats =
-    '<div class="portfolio-stats">' +
-      '<div class="ps-item"><span class="ps-num">' + record.actedOn + '</span><span class="ps-label">Acted on</span></div>' +
-      '<div class="ps-item"><span class="ps-num">' + record.given + '</span><span class="ps-label">Notes given</span></div>' +
-      '<div class="ps-item"><span class="ps-num">' + record.ackRate + '%</span><span class="ps-label">Ack rate</span></div>' +
-      '<div class="ps-item"><span class="ps-num">' + record.games + '</span><span class="ps-label">Games</span></div>' +
-      '<div class="ps-item"><span class="ps-num">' + record.genres + '</span><span class="ps-label">Genres</span></div>' +
-    '</div>';
+  '<div class="portfolio-stats">' +
+    '<div class="ps-item">' +
+      '<span class="ps-num" data-final="' + record.actedOn + '">' + record.actedOn + '</span>' +
+      '<span class="ps-label">Acted on</span>' +
+    '</div>' +
+    '<div class="ps-item">' +
+      '<span class="ps-num" data-final="' + record.given + '">' + record.given + '</span>' +
+      '<span class="ps-label">Notes given</span>' +
+    '</div>' +
+    '<div class="ps-item">' +
+      '<span class="ps-num" data-final="' + record.ackRate + '">' + record.ackRate + '%</span>' +
+      '<span class="ps-label">Ack rate</span>' +
+    '</div>' +
+    '<div class="ps-item">' +
+      '<span class="ps-num" data-final="' + record.games + '">' + record.games + '</span>' +
+      '<span class="ps-label">Games</span>' +
+    '</div>' +
+    '<div class="ps-item">' +
+      '<span class="ps-num" data-final="' + record.genres + '">' + record.genres + '</span>' +
+      '<span class="ps-label">Genres</span>' +
+    '</div>' +
+  '</div>';
 
   const historyHtml = history.map(renderHistoryEntry).join('');
 

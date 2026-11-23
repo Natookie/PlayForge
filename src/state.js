@@ -14,10 +14,31 @@ export const STATE = {
   filters: { genre: 'All', engine: 'All', stage: 'All', feedback: 'All' },
   discoverTab: 'recent',
   currentUserId: 'dev-1',
+  offline: false,
 };
 
 let lastVersion = 0;
 let pollHandle = null;
+let pendingSaves = 0;
+const offlineListeners = new Set();
+
+function notifyOfflineChange() {
+  offlineListeners.forEach((fn) => {
+    try { fn(STATE.offline); } catch (e) {}
+  });
+}
+
+export function onOfflineChange(fn) {
+  offlineListeners.add(fn);
+  return () => offlineListeners.delete(fn);
+}
+
+function setOffline(value) {
+  const next = !!value;
+  if (STATE.offline === next) return;
+  STATE.offline = next;
+  notifyOfflineChange();
+}
 
 function freshGames() {
   return GAMES.map((g) => {
@@ -60,58 +81,80 @@ function snapshot() {
   };
 }
 
-//Public API
 export async function loadState() {
   try {
     const res = await fetch(API + '?_=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (data && data.state) {
       applyStateFromServer(data.state);
       lastVersion = data.version || 0;
+      setOffline(false);
     } else {
       seedAll();
-      await saveState();
+      setOffline(true);
+      const saved = await saveState();
+      if (saved.ok) setOffline(false);
     }
   } catch (e) {
     seedAll();
+    setOffline(true);
     console.warn('Could not reach state server. Running with local seeds.', e);
   }
 }
 
 export async function saveState() {
+  pendingSaves++;
   try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ state: snapshot() }),
+      signal: controller.signal,
     });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (data && data.version) lastVersion = data.version;
+    if (data && data.version) {
+      lastVersion = data.version;
+      setOffline(false);
+      return { ok: true, version: data.version };
+    }
+    setOffline(true);
+    return { ok: false };
   } catch (e) {
     console.warn('Could not save state to server.', e);
+    setOffline(true);
+    return { ok: false };
+  } finally {
+    pendingSaves--;
   }
 }
 
 export async function resetDemo() {
   seedAll();
-  await saveState();
+  return saveState();
 }
-
-//Polling
 
 export function startPolling(onNewState) {
   if (pollHandle) clearInterval(pollHandle);
   pollHandle = setInterval(async () => {
+    if (pendingSaves > 0) return;
     try {
       const res = await fetch(API + '?_=' + Date.now());
+      if (!res.ok) { setOffline(true); return; }
       const data = await res.json();
-      if (!data || !data.state) return;
+      if (!data || !data.state) { setOffline(false); return; }
+      setOffline(false);
       if ((data.version || 0) <= lastVersion) return;
 
       applyStateFromServer(data.state);
       lastVersion = data.version;
       if (onNewState) onNewState();
     } catch (e) {
+      setOffline(true);
     }
   }, 3000);
 }

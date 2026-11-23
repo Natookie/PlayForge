@@ -150,31 +150,58 @@ function motifFor(genre, color) {
   return fn(color);
 }
 
-export function coverArt(game) {
-  const palette = paletteFor(game.id || game.title || 'playforge');
-  const title = String(game.title || '').trim();
-  const genre = game.genre || '';
+export function generatedCoverSvg(opts) {
+  const paletteSeed = opts.paletteSeed || opts.id || opts.title || 'playforge';
+  const motifSeed = opts.motifSeed || opts.id || opts.title || 'playforge';
+  const palette = paletteFor(paletteSeed);
+  const title = String(opts.title || '').trim();
+  const subtitle = String(opts.subtitle || opts.genre || '').trim();
+  const genre = opts.genre || '';
+  const gradId = 'g-' + hashString(paletteSeed + ':' + motifSeed);
+  const motif = motifFor(genre, palette.fg);
 
-  const svg =
+  return (
     '<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" ' +
         'xmlns="http://www.w3.org/2000/svg" class="cover-art-svg" role="img" ' +
-        'aria-label="Cover art for ' + escapeHtml(title) + '">' +
+        'aria-label="' + escapeHtml(title || 'Cover art') + '">' +
       '<defs>' +
-        '<linearGradient id="g-' + hashString(game.id || title) + '" x1="0" y1="0" x2="1" y2="1">' +
+        '<linearGradient id="' + gradId + '" x1="0" y1="0" x2="1" y2="1">' +
           '<stop offset="0%" stop-color="' + palette.bg + '" />' +
           '<stop offset="100%" stop-color="' + palette.mid + '" />' +
         '</linearGradient>' +
       '</defs>' +
-      '<rect width="320" height="180" fill="url(#g-' + hashString(game.id || title) + ')" />' +
-      motifFor(genre, palette.fg) +
+      '<rect width="320" height="180" fill="url(#' + gradId + ')" />' +
+      motif +
       '<rect x="0" y="140" width="320" height="40" fill="' + palette.bg + '" opacity="0.85" />' +
       '<text x="14" y="164" font-family="Inter, system-ui, sans-serif" ' +
             'font-size="16" font-weight="700" fill="' + palette.accent + '" ' +
             'letter-spacing="-0.01em">' + escapeHtml(title) + '</text>' +
-      '<text x="306" y="164" text-anchor="end" font-family="JetBrains Mono, monospace" ' +
-            'font-size="9" font-weight="500" fill="' + palette.fg + '" ' +
-            'letter-spacing="0.08em" opacity="0.9">' + escapeHtml(genre.toUpperCase()) + '</text>' +
-    '</svg>';
+      (subtitle
+        ? '<text x="306" y="164" text-anchor="end" font-family="JetBrains Mono, monospace" ' +
+                'font-size="9" font-weight="500" fill="' + palette.fg + '" ' +
+                'letter-spacing="0.08em" opacity="0.9">' + escapeHtml(subtitle.toUpperCase()) + '</text>'
+        : '') +
+    '</svg>'
+  );
+}
 
-  return '<div class="cover-art">' + svg + '</div>';
+export function coverArt(game) {
+  const generated = generatedCoverSvg({
+    id: game.id,
+    title: game.title,
+    genre: game.genre,
+    subtitle: game.genre,
+  });
+
+  if (!game.coverUrl) {
+    return '<div class="cover-art">' + generated + '</div>';
+  }
+
+  return (
+    '<div class="cover-art cover-art-image">' +
+      '<img src="' + escapeHtml(game.coverUrl) + '" alt="" loading="lazy" ' +
+           'onerror="this.parentElement.classList.add(\'is-broken\')" />' +
+      '<div class="cover-art-fallback">' + generated + '</div>' +
+    '</div>'
+  );
 }
