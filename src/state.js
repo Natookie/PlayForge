@@ -4,6 +4,9 @@ import { SEED_FEEDBACK } from './data/feedback.js';
 import { DEVELOPERS } from './data/developers.js';
 
 const API = 'api/state.php';
+const LS_KEY = 'playforge-state-v1';
+
+let STATIC_MODE = false;
 
 export const STATE = {
   games: [],
@@ -81,6 +84,26 @@ function snapshot() {
   };
 }
 
+function readLocal() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeLocal() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(snapshot()));
+  } catch (e) {}
+}
+
+function clearLocal() {
+  try { localStorage.removeItem(LS_KEY); } catch (e) {}
+}
+
 export async function loadState() {
   try {
     const res = await fetch(API + '?_=' + Date.now());
@@ -90,20 +113,33 @@ export async function loadState() {
       applyStateFromServer(data.state);
       lastVersion = data.version || 0;
       setOffline(false);
-    } else {
-      seedAll();
-      setOffline(true);
-      const saved = await saveState();
-      if (saved.ok) setOffline(false);
+      return;
     }
-  } catch (e) {
     seedAll();
     setOffline(true);
-    console.warn('Could not reach state server. Running with local seeds.', e);
+    const saved = await saveState();
+    if (saved.ok) setOffline(false);
+  } catch (e) {
+    STATIC_MODE = true;
+    setOffline(false);
+
+    const local = readLocal();
+    if (local) {
+      applyStateFromServer(local);
+    } else {
+      seedAll();
+      writeLocal();
+    }
+    console.warn('No state API — running in static demo mode (localStorage).');
   }
 }
 
 export async function saveState() {
+  if (STATIC_MODE) {
+    writeLocal();
+    return { ok: true };
+  }
+
   pendingSaves++;
   try {
     const controller = new AbortController();
@@ -135,11 +171,17 @@ export async function saveState() {
 
 export async function resetDemo() {
   seedAll();
+  if (STATIC_MODE) {
+    clearLocal();
+    writeLocal();
+    return { ok: true };
+  }
   return saveState();
 }
 
 export function startPolling(onNewState) {
   if (pollHandle) clearInterval(pollHandle);
+  if (STATIC_MODE) return;
   pollHandle = setInterval(async () => {
     if (pendingSaves > 0) return;
     try {
